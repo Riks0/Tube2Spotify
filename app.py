@@ -6,53 +6,53 @@ import json
 import logging
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Changez cela pour une clé plus sécurisée
+app.secret_key = 'your_secret_key'  # Change this to a more secure key
 
-# S'assurer que le dossier static existe
+# Ensure that the static folder exists
 if not os.path.exists('static'):
     os.makedirs('static')
 
-# Configurer les logs
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Sauvegarder les données utilisateur
+# Save user data
 def save_user_data(data):
     with open('user_data.json', 'w') as file:
         json.dump(data, file)
 
-# Charger les données utilisateur
+# Load user data
 def load_user_data():
     if os.path.exists('user_data.json'):
         with open('user_data.json', 'r') as file:
             return json.load(file)
-    return {}  # Retourne un dictionnaire vide si aucun fichier n'existe
+    return {}  # Returns an empty dictionary if no file exists
 
 @app.route('/')
 def index():
-    user_data = load_user_data()  # Charge les données utilisateur depuis un fichier JSON, si elles existent
+    user_data = load_user_data()  # Load user data from a JSON file, if available
     return render_template('index.html', user_data=user_data)
 
 @app.route('/export_csv', methods=['POST'])
 def export_csv():
-    # Récupérer les informations du formulaire
+    # Retrieve information from the form
     youtube_api_key = request.form.get('youtube_api_key', '')
     playlist_id = request.form.get('playlist_id', '')
 
-    # Enregistrer la clé API pour les futures utilisations
+    # Save the API key for future use
     save_user_data({
         'youtube_api_key': youtube_api_key,
         'spotify_client_id': '',
         'spotify_client_secret': ''
     })
 
-    # Récupérer les éléments de la playlist YouTube
+    # Retrieve the items of the YouTube playlist
     playlist_items = extract_playlist_info(youtube_api_key, playlist_id)
     
     if not playlist_items:
-        flash("Aucun élément trouvé dans la playlist.", "danger")
+        flash("No items found in the playlist.", "danger")
         return redirect(url_for('index'))
 
-    # Nettoyer les métadonnées des éléments de la playlist
+    # Clean the metadata of the playlist items
     cleaned_playlist_items = [
         {
             'title': clean_metadata(item['title']),
@@ -64,37 +64,37 @@ def export_csv():
         for item in playlist_items
     ]
 
-    # Nom du fichier CSV à générer
+    # Name of the CSV file to generate
     csv_filename = 'exported_playlist.csv'
     csv_filepath = os.path.join('static', csv_filename)
     export_playlist_to_csv(cleaned_playlist_items, csv_filepath)
 
-    flash("Playlist exportée avec succès. Vous pouvez la télécharger ci-dessous.", "success")
+    flash("Playlist successfully exported. You can download it below.", "success")
     return render_template('csv_result.html', csv_filename=csv_filename)
 
 @app.route('/export_and_transfer', methods=['POST'])
 def export_and_transfer():
     try:
-        # Récupérer les informations nécessaires pour le transfert direct
+        # Retrieve the necessary information for direct transfer
         youtube_api_key = request.form.get('youtube_api_key', '')
         playlist_id = request.form.get('playlist_id', '')
         spotify_client_id = request.form.get('spotify_client_id', '')
         spotify_client_secret = request.form.get('spotify_client_secret', '')
 
-        # Enregistrer les informations pour la prochaine fois
+        # Save the information for next time
         save_user_data({
             'youtube_api_key': youtube_api_key,
             'spotify_client_id': spotify_client_id,
             'spotify_client_secret': spotify_client_secret
         })
 
-        # Récupérer les éléments de la playlist YouTube
+        # Retrieve the items of the YouTube playlist
         playlist_items = extract_playlist_info(youtube_api_key, playlist_id)
         if not playlist_items:
-            flash("Aucun élément trouvé dans la playlist.", "danger")
+            flash("No items found in the playlist.", "danger")
             return redirect(url_for('index'))
 
-        # Nettoyer les métadonnées des éléments de la playlist
+        # Clean the metadata of the playlist items
         cleaned_playlist_items = [
             {
                 'title': clean_metadata(item['title']),
@@ -106,10 +106,10 @@ def export_and_transfer():
             for item in playlist_items
         ]
 
-        # Créer le client Spotify et effectuer le transfert
+        # Create the Spotify client and perform the transfer
         sp = create_spotify_client(spotify_client_id, spotify_client_secret, "http://localhost:8888/callback")
         user_id = sp.me()['id']
-        playlist_name = "Transféré depuis YouTube"
+        playlist_name = "Transferred from YouTube"
         playlist = sp.user_playlist_create(user_id, playlist_name, public=True)
         spotify_playlist_url = playlist['external_urls']['spotify']
 
@@ -123,12 +123,12 @@ def export_and_transfer():
             add_tracks_in_batches(sp, playlist['id'], track_uris)
             return render_template('success.html', spotify_playlist_url=spotify_playlist_url)
         else:
-            flash("Aucun morceau n'a été trouvé pour l'importation sur Spotify.", "warning")
+            flash("No tracks found for import to Spotify.", "warning")
             return redirect(url_for('index'))
 
     except Exception as e:
-        logging.error(f"Erreur lors du transfert de la playlist vers Spotify : {str(e)}")
-        flash(f"Erreur lors du transfert de la playlist vers Spotify : {str(e)}", "danger")
+        logging.error(f"Error during playlist transfer to Spotify: {str(e)}")
+        flash(f"Error during playlist transfer to Spotify: {str(e)}", "danger")
         return redirect(url_for('index'))
 
 @app.route('/success')
@@ -141,7 +141,7 @@ def download_file(filename):
     try:
         return send_from_directory('static', filename, as_attachment=True)
     except FileNotFoundError:
-        flash("Le fichier demandé n'existe pas.", "danger")
+        flash("The requested file does not exist.", "danger")
         return redirect(url_for('index'))
 
 if __name__ == '__main__':

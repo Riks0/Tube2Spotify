@@ -4,19 +4,19 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import logging
 
-# Scopes nécessaires pour créer et modifier des playlists
+# Scopes required to create and modify playlists
 SCOPE = "playlist-modify-public user-read-private"
 
-# Configurer les logs
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def clean_metadata(text):
     """
-    Nettoyer les métadonnées des titres et artistes en supprimant les suffixes non pertinents.
+    Clean the metadata of titles and artists by removing irrelevant suffixes.
     """
-    # Supprimer "- Topic" et autres mots-clés non pertinents
-    text = re.sub(r' - Topic$', '', text)  # Supprimer le suffixe " - Topic"
-    text = re.sub(r'\(.*?\)', '', text)  # Supprimer tout ce qui est entre parenthèses (comme Official Music Video)
+    # Remove "- Topic" and other irrelevant keywords
+    text = re.sub(r' - Topic$', '', text)  # Remove the " - Topic" suffix
+    text = re.sub(r'\(.*?\)', '', text)  # Remove anything within parentheses (like Official Music Video)
     return text.strip()
 
 def read_playlist_csv(filename):
@@ -34,7 +34,7 @@ def read_playlist_csv(filename):
 
 def create_spotify_client(client_id, client_secret, redirect_uri):
     """
-    Crée un client Spotify authentifié avec les identifiants fournis.
+    Creates an authenticated Spotify client with the provided credentials.
     """
     return spotipy.Spotify(auth_manager=SpotifyOAuth(
         client_id=client_id,
@@ -66,7 +66,7 @@ def add_tracks_in_batches(sp, playlist_id, track_uris):
 
 def import_playlist_from_csv(csv_filename, client_id, client_secret, redirect_uri):
     """
-    Importe une playlist depuis un fichier CSV vers Spotify.
+    Imports a playlist from a CSV file to Spotify.
     """
     sp = create_spotify_client(client_id, client_secret, redirect_uri)
 

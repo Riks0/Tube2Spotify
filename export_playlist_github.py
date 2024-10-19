@@ -5,30 +5,30 @@ from spotipy.oauth2 import SpotifyOAuth
 import logging
 from googleapiclient.discovery import build
 
-# Scopes nécessaires pour créer et modifier des playlists
+# Scopes required to create and modify playlists
 SCOPE = "playlist-modify-public user-read-private"
 
-# Configurer les logs
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def clean_metadata(text):
     """
-    Nettoyer les métadonnées des titres, artistes et albums en supprimant les suffixes non pertinents.
+    Clean metadata of titles, artists, and albums by removing irrelevant suffixes.
     """
     if text is None:
         return ""
-    # Supprimer les mentions courantes non pertinentes
+    # Remove common irrelevant mentions
     text = re.sub(r' - Topic$', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\(.*?official.*?\)', '', text, flags=re.IGNORECASE)  # Supprimer "(official ...)"
-    text = re.sub(r'\[.*?\]', '', text)  # Supprimer tout ce qui est entre crochets
-    text = re.sub(r'\(.*?\)', '', text)  # Supprimer tout ce qui est entre parenthèses
-    text = re.sub(r'ft\.|feat\.|featuring', '', text, flags=re.IGNORECASE)  # Supprimer les mentions de featuring
-    text = re.sub(r'(official|audio|video|music video|lyrics|HD|HQ)', '', text, flags=re.IGNORECASE)  # Supprimer d'autres termes courants
+    text = re.sub(r'\(.*?official.*?\)', '', text, flags=re.IGNORECASE)  # Remove "(official ...)"
+    text = re.sub(r'\[.*?\]', '', text)  # Remove anything in brackets
+    text = re.sub(r'\(.*?\)', '', text)  # Remove anything in parentheses
+    text = re.sub(r'ft\.|feat\.|featuring', '', text, flags=re.IGNORECASE)  # Remove featuring mentions
+    text = re.sub(r'(official|audio|video|music video|lyrics|HD|HQ)', '', text, flags=re.IGNORECASE)  # Remove other common terms
     return text.strip()
 
 def search_spotify_track(sp, title, artist):
     """
-    Recherche un morceau sur Spotify en fonction du titre et de l'artiste.
+    Search for a track on Spotify based on the title and artist.
     """
     query = f"track:{title} artist:{artist}"
     logging.info(f"Searching for track: {title} by {artist} on Spotify.")
@@ -45,7 +45,7 @@ def search_spotify_track(sp, title, artist):
 
 def extract_playlist_info(youtube_api_key, playlist_id):
     """
-    Extrait les informations des chansons d'une playlist YouTube en utilisant l'API YouTube Data v3.
+    Extracts song information from a YouTube playlist using the YouTube Data v3 API.
     """
     youtube = build('youtube', 'v3', developerKey=youtube_api_key)
     playlist_items = []
@@ -65,8 +65,8 @@ def extract_playlist_info(youtube_api_key, playlist_id):
                 snippet = item['snippet']
                 title = snippet.get('title', 'Unknown Title')
                 video_id = snippet['resourceId'].get('videoId', 'Unknown Video ID')
-                # Utiliser 'videoOwnerChannelTitle' pour obtenir le nom de l'artiste
-                artist = snippet.get('videoOwnerChannelTitle', 'Artiste inconnu')
+                # Use 'videoOwnerChannelTitle' to get the artist's name
+                artist = snippet.get('videoOwnerChannelTitle', 'Unknown Artist')
                 
                 playlist_items.append({
                     'title': title,
@@ -74,7 +74,7 @@ def extract_playlist_info(youtube_api_key, playlist_id):
                     'artist': artist
                 })
 
-        # Vérifier si une autre page est disponible
+        # Check if another page is available
         next_page_token = response.get('nextPageToken')
         if not next_page_token:
             break
@@ -91,7 +91,7 @@ def create_spotify_client(client_id, client_secret, redirect_uri):
 
 def export_playlist_to_csv(playlist_items, csv_filename):
     """
-    Exporte les informations d'une playlist dans un fichier CSV.
+    Exports playlist information to a CSV file.
     """
     if not playlist_items:
         logging.error("No playlist items to export.")
@@ -145,5 +145,5 @@ def transfer_to_spotify(sp, playlist_name, playlist_items):
         raise e
 
 if __name__ == "__main__":
-    # Code pour tester les fonctions si nécessaire
+    # Code for testing the functions if needed
     pass
