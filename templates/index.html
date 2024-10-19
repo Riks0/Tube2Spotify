@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-5">Bienvenue, {{ user_data.get('username', 'utilisateur') }} !</h1>
+    <p>Prêt à exporter votre playlist YouTube en CSV ou à la transférer directement sur Spotify ?</p>
+
+    <div class="row">
+        <!-- Option pour exporter en CSV -->
+        <div class="col-md-6 mb-4">
+            <h2><i class="fa fa-download"></i> Exporter en CSV</h2>
+            <p>Obtenez un fichier CSV de votre playlist YouTube pour une utilisation facile sur d'autres plateformes.</p>
+            <div class="instructions">
+                <h5>Comment trouver votre clé API YouTube :</h5>
+                <p>1. Allez sur la <a href="https://console.developers.google.com/" target="_blank">Google Developers Console</a>.</p>
+                <p>2. Créez un nouveau projet et activez l'API YouTube Data v3.</p>
+                <p>3. Allez dans "Identifiants" et cliquez sur "Créer des identifiants" puis "Clé API".</p>
+                <p>4. Copiez la clé API générée et collez-la ci-dessous.</p>
+            </div>
+            <form action="/export_csv" method="POST" onsubmit="showLoaderCSV()">
+                <input type="text" name="youtube_api_key" class="custom-input" placeholder="Entrez votre clé API YouTube" required value="{{ user_data.get('youtube_api_key', '') }}">
+                <input type="text" name="playlist_id" class="custom-input" placeholder="Entrez l'ID de la playlist" required>
+                <button type="submit" class="btn btn-primary">Exporter la Playlist en CSV</button>
+            </form>
+
+            <!-- Barre de progression pour l'export CSV -->
+            <div class="progress" style="height: 25px; margin-top: 20px;">
+                <div id="progress-bar-csv" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+
+            <!-- Message de chargement pour l'export CSV -->
+            <div id="loading-message-csv" style="text-align: center; margin-top: 20px; display: none;">
+                <p>Exportation en cours, veuillez ne pas fermer cette page...</p>
+            </div>
+        </div>
+
+        <!-- Option pour importer directement sur Spotify -->
+        <div class="col-md-6 mb-4">
+            <h2><i class="fa fa-spotify"></i> Importer sur Spotify</h2>
+            <p>Transférez votre playlist YouTube directement dans une playlist Spotify en quelques clics.</p>
+            <div class="instructions">
+                <h5>Comment trouver vos identifiants Spotify :</h5>
+                <p>1. Allez sur le <a href="https://developer.spotify.com/dashboard/applications" target="_blank">Tableau de bord Spotify Developer</a>.</p>
+                <p>2. Connectez-vous et créez une nouvelle application.</p>
+                <p>3. Copiez le "Client ID" et le "Client Secret" de votre application et collez-les ci-dessous.</p>
+                <p>4. N'oubliez pas de définir "http://localhost:8888/callback" comme URI de redirection autorisée.</p>
+            </div>
+            <form action="/export_and_transfer" method="POST" onsubmit="showLoaderSpotify()">
+                <input type="text" name="youtube_api_key" class="custom-input" placeholder="Entrez votre clé API YouTube" required value="{{ user_data.get('youtube_api_key', '') }}">
+                <input type="text" name="playlist_id" class="custom-input" placeholder="Entrez l'ID de la playlist" required>
+                <input type="text" name="spotify_client_id" class="custom-input" placeholder="Entrez votre Client ID Spotify" required value="{{ user_data.get('spotify_client_id', '') }}">
+                <input type="text" name="spotify_client_secret" class="custom-input" placeholder="Entrez votre Client Secret Spotify" required value="{{ user_data.get('spotify_client_secret', '') }}">
+                <button type="submit" class="btn btn-success">Importer la Playlist sur Spotify</button>
+            </form>
+
+            <!-- Barre de progression pour le transfert Spotify -->
+            <div class="progress" style="height: 25px; margin-top: 20px;">
+                <div id="progress-bar-spotify" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+
+            <!-- Message de chargement pour le transfert Spotify -->
+            <div id="loading-message-spotify" style="text-align: center; margin-top: 20px; display: none;">
+                <p>Transfert en cours, veuillez ne pas fermer cette page...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pied de page -->
+<footer class="text-center" style="background-color: #222; color: #bbb; padding: 20px; margin-top: 20px;">
+    <p>Créé par <a href="https://github.com/ton-profil" target="_blank">Ton Nom</a> - Utilisant les API YouTube Data et Spotify.</p>
+    <p>&copy; 2024 - Tous droits réservés.</p>
+    <div>
+        <a href="https://github.com/ton-profil" target="_blank"><i class="fa fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/ton-profil" target="_blank"><i class="fa fa-linkedin"></i></a>
+    </div>
+</footer>
+
+<!-- CSS pour un style minimaliste des champs de saisie -->
+<style>
+    body {
+        background: linear-gradient(135deg, #1c1c1c, #2c3e50);
+        background-attachment: fixed; /* Fixe le fond pour un effet de défilement */
+        color: #ddd;
+    }
+
+    .custom-input {
+        background-color: #222;
+        color: #ddd;
+        border: 1px solid #444;
+        border-radius: 5px;
+        padding: 10px;
+        width: 100%;
+        margin-bottom: 15px;
+        transition: border-color 0.3s, background-color 0.3s;
+    }
+
+    .custom-input:focus {
+        outline: none;
+        border-color: #28a745; /* Vert pour indiquer le focus */
+        background-color: #333; /* Change légèrement la couleur pour le focus */
+    }
+
+    .btn-primary, .btn-success {
+        width: 100%;
+        margin-top: 10px;
+        transition: transform 0.2s ease-in-out, background-color 0.3s ease;
+    }
+
+    .btn-primary:hover, .btn-success:hover {
+        background-color: #1db954; /* Couleur plus vive pour les boutons */
+        transform: translateY(-2px); /* Légère élévation pour un effet 3D */
+    }
+
+    .instructions {
+        background-color: #222;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+        color: #ddd;
+    }
+
+    .instructions a {
+        color: #34d058;
+        text-decoration: underline;
+    }
+
+    .instructions a:hover {
+        color: #76c7c0;
+    }
+</style>
+
+<script>
+    function showLoaderCSV() {
+        document.getElementById('loading-message-csv').style.display = 'block';
+        let progressBar = document.getElementById('progress-bar-csv');
+        let value = 0;
+
+        let interval = setInterval(function() {
+            if (value < 100) {
+                value += 1;
+                progressBar.style.width = value + '%';
+                progressBar.setAttribute('aria-valuenow', value);
+                progressBar.innerText = value + '%';
+            } else {
+                clearInterval(interval);
+            }
+        }, 50); // Ajuste la vitesse de progression pour une progression plus rapide
+    }
+
+    function showLoaderSpotify() {
+        document.getElementById('loading-message-spotify').style.display = 'block';
+        let progressBar = document.getElementById('progress-bar-spotify');
+        let value = 0;
+
+        let interval = setInterval(function() {
+            if (value < 100) {
+                value += 1;
+                progressBar.style.width = value + '%';
+                progressBar.setAttribute('aria-valuenow', value);
+                progressBar.innerText = value + '%';
+            } else {
+                clearInterval(interval);
+            }
+        }, 100); // Ajuste la vitesse de progression pour le transfert Spotify
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+        document.querySelectorAll('.custom-input').forEach(input => {
+            input.classList.toggle('dark-theme-input');
+        });
+    }
+</script>
+{% endblock %}

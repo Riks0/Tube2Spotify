@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Transfert de la Playlist en cours...</h1>
+    <p>Veuillez patienter pendant le transfert de votre playlist sur Spotify. Cela peut prendre quelques minutes selon la taille de la playlist.</p>
+    
+    <!-- Barre de progression -->
+    <div class="progress" style="height: 25px; margin-top: 20px;">
+        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+    </div>
+
+    <!-- Message de chargement -->
+    <div id="loading-message" style="text-align: center; margin-top: 20px;">
+        <p>Chargement en cours, veuillez ne pas fermer cette page...</p>
+    </div>
+</div>
+
+<script>
+    function simulateProgress() {
+        let progressBar = document.getElementById('progress-bar');
+        let value = 0;
+
+        let interval = setInterval(function() {
+            if (value < 100) {
+                value += 1; // Augmente la progression de 1% à chaque intervalle
+                progressBar.style.width = value + '%';
+                progressBar.setAttribute('aria-valuenow', value);
+                progressBar.innerText = value + '%';
+            } else {
+                clearInterval(interval);
+                // Rediriger vers la page de succès une fois le transfert terminé
+                window.location.href = '/success';
+            }
+        }, 100); // Ajuste la vitesse de progression (100ms par étape)
+    }
+
+    // Démarrer la simulation de la barre de progression
+    simulateProgress();
+</script>
+{% endblock %}

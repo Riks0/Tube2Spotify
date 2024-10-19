@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container text-center">
+    <h1 class="mt-5 text-success">🎉 Transfert Réussi ! 🎉</h1>
+    <p>Votre playlist a été importée avec succès sur Spotify.</p>
+    
+    <!-- Bouton pour revenir à l'accueil -->
+    <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">Retourner à la page d'accueil</a>
+
+    <!-- Bouton pour ouvrir la playlist sur Spotify si possible -->
+    {% if spotify_playlist_url %}
+        <a href="{{ spotify_playlist_url }}" target="_blank" class="btn btn-success mt-3">Voir la Playlist sur Spotify</a>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Exportation de la Playlist en CSV</h1>
+    <p>Votre playlist a été exportée avec succès. Vous pouvez la télécharger ci-dessous :</p>
+    
+    <a href="{{ url_for('download_file', filename=csv_filename) }}" class="btn btn-primary">
+        Télécharger le fichier CSV
+    </a>
+
+    <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Retour à l'accueil</a>
+</div>
+{% endblock %}
