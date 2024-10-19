@@ -2,14 +2,14 @@
 
 {% block content %}
 <div class="container">
-    <h1>Historique des exports</h1>
-    <p>Retrouvez vos précédentes clés API et exportations de playlists.</p>
+    <h1>Export History</h1>
+    <p>Find your previously used API keys and playlist exports.</p>
 
-    <h2>Dernières clés API utilisées :</h2>
+    <h2>Last Used API Keys:</h2>
     <ul>
-        <li>Clé API YouTube : {{ user_data.get('youtube_api_key', 'Non enregistrée') }}</li>
-        <li>Client ID Spotify : {{ user_data.get('spotify_client_id', 'Non enregistré') }}</li>
-        <li>Client Secret Spotify : {{ user_data.get('spotify_client_secret', 'Non enregistré') }}</li>
+        <li>YouTube API Key: {{ user_data.get('youtube_api_key', 'Not saved') }}</li>
+        <li>Spotify Client ID: {{ user_data.get('spotify_client_id', 'Not saved') }}</li>
+        <li>Spotify Client Secret: {{ user_data.get('spotify_client_secret', 'Not saved') }}</li>
     </ul>
 </div>
 {% endblock %}

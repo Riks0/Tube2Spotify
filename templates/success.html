@@ -2,15 +2,15 @@
 
 {% block content %}
 <div class="container text-center">
-    <h1 class="mt-5 text-success">🎉 Transfert Réussi ! 🎉</h1>
-    <p>Votre playlist a été importée avec succès sur Spotify.</p>
+    <h1 class="mt-5 text-success">🎉 Transfer Successful! 🎉</h1>
+    <p>Your playlist has been successfully imported to Spotify.</p>
     
-    <!-- Bouton pour revenir à l'accueil -->
-    <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">Retourner à la page d'accueil</a>
+    <!-- Button to return to the home page -->
+    <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">Return to Home Page</a>
 
-    <!-- Bouton pour ouvrir la playlist sur Spotify si possible -->
+    <!-- Button to open the playlist on Spotify if possible -->
     {% if spotify_playlist_url %}
-        <a href="{{ spotify_playlist_url }}" target="_blank" class="btn btn-success mt-3">Voir la Playlist sur Spotify</a>
+        <a href="{{ spotify_playlist_url }}" target="_blank" class="btn btn-success mt-3">View Playlist on Spotify</a>
     {% endif %}
 </div>
 {% endblock %}
