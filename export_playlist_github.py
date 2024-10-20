@@ -22,7 +22,7 @@ def clean_metadata(text):
     text = re.sub(r'\[.*?\]', '', text)  # Remove anything in brackets
     text = re.sub(r'\(.*?\)', '', text)  # Remove anything in parentheses
     text = re.sub(r'ft\.|feat\.|featuring', '', text, flags=re.IGNORECASE)  # Remove featuring mentions
-    text = re.sub(r'(official|audio|video|music video|lyrics|HD|HQ)', '', text, flags=re.IGNORECASE)  # Remove other common terms
+    text = re.sub(r'(official|audio|video|music video|lyrics|HD|HQ|remix|mix)', '', text, flags=re.IGNORECASE)  # Remove other common terms
     return text.strip()
 
 def search_spotify_track(sp, title, artist):
