@@ -116,6 +116,9 @@ def export_playlist_to_csv(playlist_items, csv_filename):
     return csv_filename
 
 def add_tracks_in_batches(sp, playlist_id, track_uris):
+    """
+    Add tracks to a Spotify playlist in batches to avoid exceeding API limits.
+    """
     batch_size = 100
     for i in range(0, len(track_uris), batch_size):
         batch = track_uris[i:i + batch_size]
@@ -123,6 +126,9 @@ def add_tracks_in_batches(sp, playlist_id, track_uris):
         logging.info(f"Added {len(batch)} tracks to the playlist.")
 
 def transfer_to_spotify(sp, playlist_name, playlist_items):
+    """
+    Transfer playlist items to a new Spotify playlist.
+    """
     logging.info("Starting playlist transfer to Spotify...")
     try:
         user_id = sp.me()['id']
