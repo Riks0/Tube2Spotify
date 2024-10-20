@@ -30,6 +30,22 @@ def clean_metadata(text):
     text = re.sub(r'(official|audio|video|music video|lyrics|HD|HQ|remix|mix)', '', text, flags=re.IGNORECASE)  # Remove other common terms
     return text.strip()
 
+def search_spotify_track(sp, title, artist):
+    """
+    Search for a track on Spotify based on title and artist.
+    """
+    query = f"track:{title} artist:{artist}"
+    logging.info(f"Searching for track: {title} by {artist} on Spotify.")
+    results = sp.search(q=query, type='track', limit=1)
+
+    if results['tracks']['items']:
+        track_uri = results['tracks']['items'][0]['uri']
+        logging.info(f"Found track URI: {track_uri}")
+        return track_uri
+    else:
+        logging.warning(f"Track not found: {title} by {artist}")
+        return None
+
 def search_spotify_track_with_cache(sp, title, artist):
     """
     Search for a track on Spotify based on title and artist, with caching to speed up repeated searches.
