@@ -155,6 +155,6 @@ if __name__ == "__main__":
     SPOTIFY_CLIENT_ID = 'your_client_id'
     SPOTIFY_CLIENT_SECRET = 'your_client_secret'
 
-    # Create Spotify client
+    # Create Spotify client with two arguments
     sp = create_spotify_client(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET)
     # Use the client to perform actions as needed
