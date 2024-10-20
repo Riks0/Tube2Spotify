@@ -4,12 +4,17 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import logging
 from googleapiclient.discovery import build
+import concurrent.futures
+from cachetools import TTLCache
 
 # Necessary scopes for creating and modifying playlists
 SCOPE = "playlist-modify-public user-read-private"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Cache for storing search results to avoid redundant searches
+search_cache = TTLCache(maxsize=10000, ttl=3600)
 
 def clean_metadata(text):
     """
@@ -25,20 +30,26 @@ def clean_metadata(text):
     text = re.sub(r'(official|audio|video|music video|lyrics|HD|HQ|remix|mix)', '', text, flags=re.IGNORECASE)  # Remove other common terms
     return text.strip()
 
-def search_spotify_track(sp, title, artist):
+def search_spotify_track_with_cache(sp, title, artist):
     """
-    Search for a track on Spotify based on title and artist.
+    Search for a track on Spotify based on title and artist, with caching to speed up repeated searches.
     """
     query = f"track:{title} artist:{artist}"
+    if query in search_cache:
+        logging.info(f"Cache hit for track: {title} by {artist}")
+        return search_cache[query]
+    
     logging.info(f"Searching for track: {title} by {artist} on Spotify.")
     results = sp.search(q=query, type='track', limit=1)
 
     if results['tracks']['items']:
         track_uri = results['tracks']['items'][0]['uri']
         logging.info(f"Found track URI: {track_uri}")
+        search_cache[query] = track_uri
         return track_uri
     else:
         logging.warning(f"Track not found: {title} by {artist}")
+        search_cache[query] = None
         return None
 
 def extract_playlist_info(youtube_api_key, playlist_id):
@@ -114,15 +125,19 @@ def export_playlist_to_csv(playlist_items, csv_filename):
     logging.info(f"Playlist exported to CSV: {csv_filename}")
     return csv_filename
 
-def add_tracks_in_batches(sp, playlist_id, track_uris):
+def add_tracks_in_batches_parallel(sp, playlist_id, track_uris):
     """
-    Add tracks to a Spotify playlist in batches to avoid exceeding API limits.
+    Add tracks to a Spotify playlist in parallel batches to speed up the process.
     """
     batch_size = 100
-    for i in range(0, len(track_uris), batch_size):
-        batch = track_uris[i:i + batch_size]
+    batches = [track_uris[i:i + batch_size] for i in range(0, len(track_uris), batch_size)]
+    
+    def add_batch(batch):
         sp.playlist_add_items(playlist_id, batch)
         logging.info(f"Added {len(batch)} tracks to the playlist.")
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        executor.map(add_batch, batches)
 
 def transfer_to_spotify(sp, playlist_name, playlist_items):
     """
@@ -136,25 +151,15 @@ def transfer_to_spotify(sp, playlist_name, playlist_items):
 
         track_uris = []
         for item in playlist_items:
-            track_uri = search_spotify_track(sp, item['title'], item['artist'])
+            track_uri = search_spotify_track_with_cache(sp, item['title'], item['artist'])
             if track_uri:
                 track_uris.append(track_uri)
 
         if track_uris:
-            add_tracks_in_batches(sp, playlist['id'], track_uris)
+            add_tracks_in_batches_parallel(sp, playlist['id'], track_uris)
             logging.info(f"Playlist successfully updated with {len(track_uris)} tracks.")
         else:
             logging.warning("No tracks found to add to the playlist.")
     except Exception as e:
         logging.error(f"Failed to transfer playlist: {str(e)}")
         raise e
-
-if __name__ == "__main__":
-    # Example usage
-    SPOTIFY_CLIENT_ID = 'your_client_id'
-    SPOTIFY_CLIENT_SECRET = 'your_client_secret'
-    REDIRECT_URI = 'http://localhost:8888/callback'
-
-    # Create Spotify client with three arguments
-    sp = create_spotify_client(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, REDIRECT_URI)
-    # Use the client to perform actions as needed
