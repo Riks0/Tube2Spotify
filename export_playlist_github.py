@@ -151,5 +151,10 @@ def transfer_to_spotify(sp, playlist_name, playlist_items):
         raise e
 
 if __name__ == "__main__":
-    # Code for testing the functions if needed
-    pass
+    # Example usage
+    SPOTIFY_CLIENT_ID = 'your_client_id'
+    SPOTIFY_CLIENT_SECRET = 'your_client_secret'
+
+    # Create Spotify client
+    sp = create_spotify_client(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET)
+    # Use the client to perform actions as needed
