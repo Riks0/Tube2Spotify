@@ -11,9 +11,8 @@
     <header>
         <div class="container">
             <h1>
-                <a href="/">
-                    <span class="youtube-text">Tube</span> <i class="fa fa-exchange-alt"></i> 
-                    <span class="spotify-text">Spotify</span>
+                <a href="/" style="text-decoration: none; color: inherit;">
+                    <span style="color: #ff0000;">Tube2</span><span style="color: #1db954;">Spotify</span>
                 </a>
             </h1>
             <button id="theme-toggle" class="theme-toggle">
@@ -26,11 +25,11 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 - Tube2Spotify | <a href="/history">History</a></p>
-        </div>
+    <footer class="text-center" style="background-color: #333; color: #ddd; padding: 20px; margin-top: 20px;">
+        <p>Created by <a href="https://github.com/Riks0" target="_blank" style="color: #1db954;">Riks</a> - Using YouTube Data and Spotify APIs.</p>
+        <p>&copy; 2024 - Tube2Spotify - All Rights Reserved.</p>
     </footer>
+
     <script>
         const themeToggle = document.getElementById('theme-toggle');
         themeToggle.addEventListener('click', () => {
