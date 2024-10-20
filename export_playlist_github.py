@@ -77,11 +77,10 @@ def extract_playlist_info(youtube_api_key, playlist_id):
 
     return playlist_items
 
-def create_spotify_client(client_id, client_secret):
+def create_spotify_client(client_id, client_secret, redirect_uri):
     """
     Create a Spotify client with the given credentials and redirect URI.
     """
-    redirect_uri = "https://tube2spotify.onrender.com/callback"
     return spotipy.Spotify(auth_manager=SpotifyOAuth(
         client_id=client_id,
         client_secret=client_secret,
@@ -154,7 +153,8 @@ if __name__ == "__main__":
     # Example usage
     SPOTIFY_CLIENT_ID = 'your_client_id'
     SPOTIFY_CLIENT_SECRET = 'your_client_secret'
+    REDIRECT_URI = 'http://localhost:8888/callback'
 
-    # Create Spotify client with two arguments
-    sp = create_spotify_client(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET)
+    # Create Spotify client with three arguments
+    sp = create_spotify_client(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, REDIRECT_URI)
     # Use the client to perform actions as needed
