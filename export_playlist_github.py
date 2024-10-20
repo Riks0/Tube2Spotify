@@ -5,7 +5,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import logging
 from googleapiclient.discovery import build
 
-# Scopes required to create and modify playlists
+# Necessary scopes for creating and modifying playlists
 SCOPE = "playlist-modify-public user-read-private"
 
 # Configure logging
@@ -13,11 +13,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 def clean_metadata(text):
     """
-    Clean metadata of titles, artists, and albums by removing irrelevant suffixes.
+    Clean metadata for titles, artists, and albums by removing irrelevant suffixes.
     """
     if text is None:
         return ""
-    # Remove common irrelevant mentions
     text = re.sub(r' - Topic$', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\(.*?official.*?\)', '', text, flags=re.IGNORECASE)  # Remove "(official ...)"
     text = re.sub(r'\[.*?\]', '', text)  # Remove anything in brackets
@@ -28,11 +27,10 @@ def clean_metadata(text):
 
 def search_spotify_track(sp, title, artist):
     """
-    Search for a track on Spotify based on the title and artist.
+    Search for a track on Spotify based on title and artist.
     """
     query = f"track:{title} artist:{artist}"
     logging.info(f"Searching for track: {title} by {artist} on Spotify.")
-    
     results = sp.search(q=query, type='track', limit=1)
 
     if results['tracks']['items']:
@@ -45,7 +43,7 @@ def search_spotify_track(sp, title, artist):
 
 def extract_playlist_info(youtube_api_key, playlist_id):
     """
-    Extracts song information from a YouTube playlist using the YouTube Data v3 API.
+    Extract song information from a YouTube playlist using the YouTube Data v3 API.
     """
     youtube = build('youtube', 'v3', developerKey=youtube_api_key)
     playlist_items = []
@@ -65,7 +63,6 @@ def extract_playlist_info(youtube_api_key, playlist_id):
                 snippet = item['snippet']
                 title = snippet.get('title', 'Unknown Title')
                 video_id = snippet['resourceId'].get('videoId', 'Unknown Video ID')
-                # Use 'videoOwnerChannelTitle' to get the artist's name
                 artist = snippet.get('videoOwnerChannelTitle', 'Unknown Artist')
                 
                 playlist_items.append({
@@ -74,14 +71,17 @@ def extract_playlist_info(youtube_api_key, playlist_id):
                     'artist': artist
                 })
 
-        # Check if another page is available
         next_page_token = response.get('nextPageToken')
         if not next_page_token:
             break
 
     return playlist_items
 
-def create_spotify_client(client_id, client_secret, redirect_uri):
+def create_spotify_client(client_id, client_secret):
+    """
+    Create a Spotify client with the given credentials and redirect URI.
+    """
+    redirect_uri = "https://tube2spotify.onrender.com/callback"
     return spotipy.Spotify(auth_manager=SpotifyOAuth(
         client_id=client_id,
         client_secret=client_secret,
@@ -91,7 +91,7 @@ def create_spotify_client(client_id, client_secret, redirect_uri):
 
 def export_playlist_to_csv(playlist_items, csv_filename):
     """
-    Exports playlist information to a CSV file.
+    Export playlist information to a CSV file.
     """
     if not playlist_items:
         logging.error("No playlist items to export.")
