@@ -1,2 +1,2 @@
 # ytmusictospotify
-An easy tool to convert your playlist from yt music to spotify for free
+You can use the tool localy or on https://tube2spotify.onrender.com/
